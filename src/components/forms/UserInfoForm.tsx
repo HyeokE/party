@@ -72,7 +72,7 @@ export default function UserInfoForm({
     mode: 'onChange',
     defaultValues: {
       name: '',
-      phone: '',
+      phone: '010',
       email: ''
     }
   })
