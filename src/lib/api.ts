@@ -33,7 +33,8 @@ export async function checkDuplicateSubmission(
     })
 
     const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
-      method: 'GET'
+      method: 'GET',
+      credentials: 'omit',
     })
 
     if (!response.ok) {

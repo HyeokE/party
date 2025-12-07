@@ -8,7 +8,7 @@ export const userDataSchema = z.object({
   phone: z.string()
     .regex(/^010-\d{4}-\d{4}$/, '전화번호는 010-xxxx-xxxx 형식이어야 합니다'),
 
-  email: z.string()
+  email: z
     .email('올바른 이메일 형식이 아닙니다')
 })
 

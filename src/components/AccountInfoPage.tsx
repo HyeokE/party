@@ -7,6 +7,7 @@ export default function AccountInfoPage() {
   const navigate = useNavigate()
   const { userData } = useUserData()
   const [isConfirmed, setIsConfirmed] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const accountNumber = '국민은행 123-456-789012'
 
   const handleCopyAccount = () => {
@@ -15,10 +16,18 @@ export default function AccountInfoPage() {
   }
 
   const handleSubmit = async () => {
-    if (isConfirmed) {
-      // 계좌 확인 완료 상태로 Google Sheets에 업데이트
-      await saveToGoogleSheets(userData, 'join', true)
-      navigate('/success')
+    if (isConfirmed && !isSubmitting) {
+      setIsSubmitting(true)
+      try {
+        // 계좌 확인 완료 상태로 Google Sheets에 업데이트
+        await saveToGoogleSheets(userData, 'join', true)
+        navigate('/success')
+      } catch (error) {
+        console.error('참여 완료 처리 중 오류:', error)
+        alert('참여 완료 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+      } finally {
+        setIsSubmitting(false)
+      }
     }
   }
 
@@ -119,15 +128,17 @@ export default function AccountInfoPage() {
                 {/* Submit Button */}
                 <button
                   onClick={handleSubmit}
-                  disabled={!isConfirmed}
+                  disabled={!isConfirmed || isSubmitting}
                   className={`w-full font-righteous text-xl py-5 rounded-xl transform transition-all duration-300 relative overflow-hidden group min-h-[56px] ${
-                    isConfirmed
+                    isConfirmed && !isSubmitting
                       ? 'bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white hover:shadow-lg hover:shadow-[#FF6B6B]/50 hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
                       : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  <span className="relative z-10">참여 완료하기 🎉</span>
-                  {isConfirmed && (
+                  <span className="relative z-10">
+                    {isSubmitting ? '처리 중...' : '참여 완료하기 🎉'}
+                  </span>
+                  {isConfirmed && !isSubmitting && (
                     <div className="absolute inset-0 bg-gradient-to-r from-[#FF8E53] to-[#FFE66D] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   )}
                 </button>

@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { useUserData } from '../../hooks/useUserData'
 import { userDataSchema, type UserDataFormValues } from '../../lib/schemas/userSchema'
-import { saveToGoogleSheets } from '../../lib/googleSheets'
 import { checkDuplicateSubmission } from '../../lib/api'
+import { saveToGoogleSheets } from '../../lib/googleSheets'
 import ConfirmationDialog from '../ui/ConfirmationDialog'
 
 interface UserInfoFormProps {
@@ -50,7 +50,6 @@ export default function UserInfoForm({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [currentStep, setCurrentStep] = useState<StepIndex>(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false)
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean
@@ -64,13 +63,18 @@ export default function UserInfoForm({
 
   const {
     register,
-    handleSubmit,
     watch,
     trigger,
+    setValue,
     formState: { errors }
   } = useForm<UserDataFormValues>({
     resolver: zodResolver(userDataSchema),
-    mode: 'onChange'
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: ''
+    }
   })
 
   const formValues = watch()
@@ -115,6 +119,51 @@ export default function UserInfoForm({
     const isValid = await trigger(currentStepData.field)
     if (isValid && !isLastStep) {
       setCurrentStep((prev) => (prev + 1) as StepIndex)
+    } else if (isValid && isLastStep) {
+      // 마지막 스텝에서 "다음으로" 버튼을 누르면 중복 체크 수행
+      await handleDuplicateCheckAndProceed()
+    }
+  }
+
+  const handleDuplicateCheckAndProceed = async () => {
+    const formData = formValues as UserDataFormValues
+    
+    // 중복 체크
+    setIsCheckingDuplicate(true)
+    const duplicateCheck = await checkDuplicateSubmission(formData.email, formData.phone)
+    setIsCheckingDuplicate(false)
+
+    // 중복이 존재하면
+    if (duplicateCheck.exists) {
+      // 타입이 다르면 확인 다이얼로그 표시
+      if (duplicateCheck.type !== sheetType) {
+        setConfirmDialog({
+          isOpen: true,
+          existingType: duplicateCheck.type,
+          name: duplicateCheck.name
+        })
+        return
+      }
+      // 같은 타입이면 중복 신청으로 막기
+      alert(`${duplicateCheck.name || '회원'}님은 이미 "${sheetType === 'join' ? '참여하기' : '알림 받기'}"로 신청하셨습니다.`)
+      return
+    }
+
+    // 중복이 아니면 context에 저장
+    updateUserData(formData)
+    
+    // InterestForm의 경우 입금이 없으므로 바로 저장하고 성공 페이지로 이동
+    if (sheetType === 'interest') {
+      try {
+        await saveToGoogleSheets(formData, 'interest')
+        navigate(redirectPath)
+      } catch (error) {
+        console.error('알림 신청 저장 실패:', error)
+        alert('알림 신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+      }
+    } else {
+      // JoinForm의 경우 입금 페이지로 이동 (입금 완료 후 저장)
+      navigate(redirectPath)
     }
   }
 
@@ -125,48 +174,54 @@ export default function UserInfoForm({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isLastStep && canProceed) {
+    if (e.key === 'Enter' && canProceed && !isCheckingDuplicate) {
       e.preventDefault()
       goToNextStep()
     }
   }
 
-  const handleFormSubmit = async (data: UserDataFormValues) => {
-    // 중복 체크
-    setIsCheckingDuplicate(true)
-    const duplicateCheck = await checkDuplicateSubmission(data.email, data.phone)
-    setIsCheckingDuplicate(false)
-
-    // 중복이고 타입이 다르면 확인 다이얼로그 표시
-    if (duplicateCheck.exists && duplicateCheck.type !== sheetType) {
-      setConfirmDialog({
-        isOpen: true,
-        existingType: duplicateCheck.type,
-        name: duplicateCheck.name
-      })
-      return
+  // 전화번호 자동 포맷팅 함수
+  const formatPhoneNumber = (value: string): string => {
+    // 숫자만 추출
+    const numbers = value.replace(/\D/g, '')
+    
+    // 최대 11자리까지만 허용
+    const limitedNumbers = numbers.slice(0, 11)
+    
+    // 포맷팅: 010-1234-5678
+    if (limitedNumbers.length <= 3) {
+      return limitedNumbers
+    } else if (limitedNumbers.length <= 7) {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`
+    } else {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3, 7)}-${limitedNumbers.slice(7)}`
     }
-
-    // 중복 아니거나 같은 타입이면 바로 제출
-    await submitForm(data)
   }
 
-  const submitForm = async (data: UserDataFormValues) => {
-    setIsSubmitting(true)
-    try {
-      updateUserData(data)
-      await saveToGoogleSheets(data, sheetType)
-      navigate(redirectPath)
-    } catch (error) {
-      console.error('Form submission error:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value)
+    setValue('phone', formatted, { shouldValidate: true })
   }
 
   const handleConfirmTypeChange = async () => {
     setConfirmDialog({ isOpen: false, existingType: null, name: null })
-    await submitForm(formValues as UserDataFormValues)
+    // 확인 다이얼로그에서 확인을 누르면 context에 저장하고 다음 페이지로 이동
+    const formData = formValues as UserDataFormValues
+    updateUserData(formData)
+    
+    // InterestForm의 경우 입금이 없으므로 바로 저장하고 성공 페이지로 이동
+    if (sheetType === 'interest') {
+      try {
+        await saveToGoogleSheets(formData, 'interest')
+        navigate(redirectPath)
+      } catch (error) {
+        console.error('알림 신청 저장 실패:', error)
+        alert('알림 신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+      }
+    } else {
+      // JoinForm의 경우 입금 페이지로 이동 (입금 완료 후 저장)
+      navigate(redirectPath)
+    }
   }
 
   const handleCancelTypeChange = () => {
@@ -227,7 +282,7 @@ export default function UserInfoForm({
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+          <form className="space-y-6">
             {/* Current Step Field */}
             <div className="min-h-[120px]" key={currentStep}>
               <label className="font-outfit text-sm font-semibold text-gray-300 uppercase tracking-wide flex items-center gap-2 mb-2">
@@ -236,8 +291,23 @@ export default function UserInfoForm({
               </label>
 
               <input
-                {...register(currentStepData.field)}
-                ref={inputRef}
+                {...(() => {
+                  const { ref, onChange, ...rest } = register(currentStepData.field)
+                  return {
+                    ...rest,
+                    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                      if (currentStepData.field === 'phone') {
+                        handlePhoneChange(e)
+                      } else {
+                        onChange(e)
+                      }
+                    },
+                    ref: (e: HTMLInputElement | null) => {
+                      ref(e)
+                      inputRef.current = e
+                    }
+                  }
+                })()}
                 type={currentStepData.type}
                 placeholder={currentStepData.placeholder}
                 onKeyDown={handleKeyDown}
@@ -273,41 +343,27 @@ export default function UserInfoForm({
                 </button>
               )}
 
-              {isLastStep ? (
-                <button
-                  type="submit"
-                  disabled={!canProceed || isSubmitting || isCheckingDuplicate}
-                  className={`flex-1 font-righteous text-xl py-5 rounded-xl transform transition-all duration-300 relative overflow-hidden group min-h-[56px] ${
-                    canProceed && !isSubmitting && !isCheckingDuplicate
-                      ? `bg-gradient-to-r from-[${primaryColor}] to-[${secondaryColor}] text-white hover:shadow-lg hover:shadow-[${primaryColor}]/50 hover:scale-[1.02] active:scale-[0.98]`
-                      : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  <span className="relative z-10">
-                    {isCheckingDuplicate
-                      ? '확인 중...'
-                      : isSubmitting
-                      ? '처리 중...'
-                      : buttonText}
-                  </span>
-                  {canProceed && !isSubmitting && !isCheckingDuplicate && (
-                    <div className={`absolute inset-0 bg-gradient-to-r from-[${secondaryColor}] to-[${primaryColor}] opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                  )}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={goToNextStep}
-                  disabled={!canProceed}
-                  className={`flex-1 font-righteous text-xl py-5 rounded-xl transform transition-all duration-300 min-h-[56px] ${
-                    canProceed
-                      ? `bg-gradient-to-r from-[${primaryColor}] to-[${secondaryColor}] text-white hover:shadow-lg hover:shadow-[${primaryColor}]/50 hover:scale-[1.02] active:scale-[0.98]`
-                      : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  다음 →
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={goToNextStep}
+                disabled={!canProceed || isCheckingDuplicate}
+                className={`flex-1 font-righteous text-xl py-5 rounded-xl transform transition-all duration-300 relative overflow-hidden group min-h-[56px] ${
+                  canProceed && !isCheckingDuplicate
+                    ? `bg-gradient-to-r from-[${primaryColor}] to-[${secondaryColor}] text-white hover:shadow-lg hover:shadow-[${primaryColor}]/50 hover:scale-[1.02] active:scale-[0.98]`
+                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                <span className="relative z-10">
+                  {isCheckingDuplicate
+                    ? '확인 중...'
+                    : isLastStep
+                    ? buttonText
+                    : '다음 →'}
+                </span>
+                {canProceed && !isCheckingDuplicate && (
+                  <div className={`absolute inset-0 bg-gradient-to-r from-[${secondaryColor}] to-[${primaryColor}] opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                )}
+              </button>
             </div>
           </form>
         </div>
