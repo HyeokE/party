@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { UserDataProvider } from './context/UserDataContext'
 import HomePage from './components/HomePage'
 import JoinPartyForm from './components/JoinPartyForm'
 import AccountInfoPage from './components/AccountInfoPage'
 import SuccessPage from './components/SuccessPage'
 import InterestForm from './components/InterestForm'
+import { UserDataProvider } from './context/UserDataContext'
 
 function App() {
   return (

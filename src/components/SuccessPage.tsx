@@ -56,20 +56,20 @@ export default function SuccessPage({ isInterest = false }: SuccessPageProps) {
           <div className="relative z-10 space-y-8">
             {/* Icon */}
             <div className="inline-block">
-              <div className="text-8xl md:text-9xl animate-bounce-in">
+              <div className="text-7xl md:text-8xl animate-bounce-in">
                 {isInterest ? '✨' : '🎉'}
               </div>
             </div>
 
             {/* Title */}
             <div className="space-y-4">
-              <h1 className="font-righteous text-4xl md:text-6xl font-bold">
+              <h1 className="font-righteous text-3xl md:text-4xl font-bold">
                 <span className="bg-gradient-to-r from-[#FF6B6B] via-[#FF8E53] to-[#FFE66D] bg-clip-text text-transparent">
                   {isInterest ? '알림 신청 완료!' : '참여 완료!'}
                 </span>
               </h1>
 
-              <p className="font-outfit text-xl md:text-2xl text-gray-300 max-w-xl mx-auto leading-relaxed">
+              <p className="font-outfit text-base md:text-lg text-gray-300 max-w-xl mx-auto leading-relaxed">
                 {isInterest ? (
                   <>
                     <span className="text-[#4ECDC4] font-semibold">{userData.name}</span>님,<br />
@@ -122,7 +122,7 @@ export default function SuccessPage({ isInterest = false }: SuccessPageProps) {
             {/* Home Button */}
             <button
               onClick={() => navigate('/')}
-              className="mt-8 px-12 py-4 bg-gradient-to-r from-[#4ECDC4] to-[#45B7D1] text-white font-righteous text-xl rounded-xl hover:shadow-lg hover:shadow-[#4ECDC4]/50 transform hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
+              className="mt-8 px-12 py-4 bg-gradient-to-r from-[#4ECDC4] to-[#45B7D1] text-white font-righteous text-lg rounded-xl hover:shadow-lg hover:shadow-[#4ECDC4]/50 transform hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group min-h-[52px]"
             >
               <span className="relative z-10">홈으로 돌아가기</span>
               <div className="absolute inset-0 bg-gradient-to-r from-[#45B7D1] to-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

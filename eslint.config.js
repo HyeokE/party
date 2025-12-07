@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
   },
 ])

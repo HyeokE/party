@@ -1,5 +1,21 @@
 import React, { useState, type ReactNode } from 'react'
-import { UserDataContext, type UserData } from './UserDataContext'
+
+import { createContext } from 'react'
+
+export interface UserData {
+  name: string
+  phone: string
+  email: string
+}
+
+export interface UserDataContextType {
+  userData: UserData
+  updateUserData: (data: UserData) => void
+}
+
+export const UserDataContext = createContext<UserDataContextType | undefined>(undefined)
+
+
 
 export function UserDataProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData>({

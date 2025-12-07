@@ -69,13 +69,13 @@ export default function AccountInfoPage() {
 
                 <div className="relative z-10">
                   <p className="font-outfit text-sm text-gray-400 mb-2 uppercase tracking-wide">계좌번호</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="font-righteous text-2xl md:text-3xl text-white">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <p className="font-righteous text-lg md:text-xl lg:text-2xl text-white break-all sm:break-normal">
                       {accountNumber}
                     </p>
                     <button
                       onClick={handleCopyAccount}
-                      className="px-4 py-2 bg-[#4ECDC4] hover:bg-[#45B7D1] text-[#0F1419] font-outfit font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 whitespace-nowrap"
+                      className="px-4 py-2 bg-[#4ECDC4] hover:bg-[#45B7D1] text-[#0F1419] font-outfit font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 whitespace-nowrap min-h-[44px]"
                     >
                       복사
                     </button>
@@ -111,7 +111,7 @@ export default function AccountInfoPage() {
                       </svg>
                     </div>
                   </div>
-                  <span className="font-outfit text-lg text-gray-300 group-hover:text-white transition-colors">
+                  <span className="font-outfit text-base text-gray-300 group-hover:text-white transition-colors">
                     입금을 완료했습니다
                   </span>
                 </label>
@@ -120,7 +120,7 @@ export default function AccountInfoPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={!isConfirmed}
-                  className={`w-full font-righteous text-2xl py-5 rounded-xl transform transition-all duration-300 relative overflow-hidden group ${
+                  className={`w-full font-righteous text-xl py-5 rounded-xl transform transition-all duration-300 relative overflow-hidden group min-h-[56px] ${
                     isConfirmed
                       ? 'bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white hover:shadow-lg hover:shadow-[#FF6B6B]/50 hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
                       : 'bg-gray-700 text-gray-500 cursor-not-allowed'
