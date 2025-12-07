@@ -73,6 +73,25 @@ export async function saveToGoogleSheets(
           }
           // success가 true인 경우 성공
           if (parsed.success === true) {
+            if (parsed.debug) {
+              console.log('🔍 디버깅 정보:', parsed.debug)
+              if (parsed.updated) {
+                console.log('✅ 기존 데이터 업데이트됨:', {
+                  검색한이메일: parsed.debug.searchedEmail,
+                  검색한전화번호: parsed.debug.searchedPhone,
+                  찾은행번호: parsed.debug.foundRowIndex,
+                  이전타입: parsed.debug.oldType,
+                  새타입: parsed.debug.newType
+                })
+              } else {
+                console.log('➕ 새 데이터 추가됨:', {
+                  검색한이메일: parsed.debug.searchedEmail,
+                  검색한전화번호: parsed.debug.searchedPhone,
+                  전체행수: parsed.debug.totalRows,
+                  메시지: parsed.debug.message
+                })
+              }
+            }
             console.log('Google Sheets에 데이터 저장 완료:', parsed)
             return
           }
