@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to Firebase Hosting
 
 on:
   push:
@@ -8,15 +8,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,26 +32,17 @@ jobs:
 
       - name: Build
         env:
-          VITE_GITHUB_PAGES: ${{ secrets.VITE_GITHUB_PAGES }}
           VITE_GOOGLE_SCRIPT_URL: ${{ secrets.VITE_GOOGLE_SCRIPT_URL }}
         run: pnpm build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Authenticate Firebase
+        uses: google-github-actions/auth@v2
         with:
-          path: './dist'
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to Firebase
+        run: firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }}
 
