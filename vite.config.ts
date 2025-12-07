@@ -4,7 +4,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.GITHUB_PAGES ? '/party/' : '/',
+  base: process.env.VITE_GITHUB_PAGES ? '/party/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
