@@ -12,12 +12,12 @@ export default function HomePage() {
           <div className="absolute -top-8 -left-4 w-16 h-16 border-4 border-[#FF6B6B] rotate-12 rounded-lg opacity-60 animate-spin-slow" />
           <div className="absolute -bottom-4 -right-6 w-12 h-12 bg-gradient-to-br from-[#4ECDC4] to-[#45B7D1] rounded-full opacity-40" />
 
-          <h1 className="font-righteous text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight">
+          <h1 className="font-righteous text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
             <span className="bg-gradient-to-r from-[#FF6B6B] via-[#FF8E53] to-[#FFE66D] bg-clip-text text-transparent animate-gradient">
               PARTY
             </span>
           </h1>
-          <p className="font-outfit text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-outfit text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
             특별한 순간을 함께할 준비가 되셨나요?<br />
             <span className="text-[#4ECDC4] font-semibold">지금 바로 참여하세요!</span>
           </p>
@@ -35,10 +35,10 @@ export default function HomePage() {
 
             <div className="relative z-10 text-left space-y-3">
               <div className="text-5xl">🎉</div>
-              <h3 className="font-righteous text-3xl md:text-4xl text-white font-bold">
+              <h3 className="font-righteous text-2xl md:text-3xl text-white font-bold">
                 파티 참여하기
               </h3>
-              <p className="font-outfit text-white/90 text-lg">
+              <p className="font-outfit text-white/90 text-base">
                 지금 바로 등록하고 함께해요!
               </p>
             </div>
@@ -56,10 +56,10 @@ export default function HomePage() {
 
             <div className="relative z-10 text-left space-y-3">
               <div className="text-5xl">✨</div>
-              <h3 className="font-righteous text-3xl md:text-4xl text-white font-bold">
+              <h3 className="font-righteous text-2xl md:text-3xl text-white font-bold">
                 관심 있어요
               </h3>
-              <p className="font-outfit text-white/90 text-lg">
+              <p className="font-outfit text-white/90 text-base">
                 알림을 받고 나중에 결정할게요
               </p>
             </div>

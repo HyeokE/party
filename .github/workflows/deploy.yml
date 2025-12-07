@@ -39,6 +39,7 @@ jobs:
       - name: Build
         env:
           GITHUB_PAGES: true
+          VITE_GOOGLE_SCRIPT_URL: ${{ secrets.VITE_GOOGLE_SCRIPT_URL }}
         run: pnpm build
 
       - name: Setup Pages

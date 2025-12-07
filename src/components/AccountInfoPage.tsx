@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserData } from '../hooks/useUserData'
+import { saveToGoogleSheets } from '../lib/googleSheets'
 
 export default function AccountInfoPage() {
   const navigate = useNavigate()
@@ -13,8 +14,10 @@ export default function AccountInfoPage() {
     // Could add a toast notification here
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isConfirmed) {
+      // 계좌 확인 완료 상태로 Google Sheets에 업데이트
+      await saveToGoogleSheets(userData, 'join', true)
       navigate('/success')
     }
   }
@@ -52,10 +55,10 @@ export default function AccountInfoPage() {
               {/* Header */}
               <div className="mb-8 space-y-3">
                 <div className="text-5xl mb-3 animate-bounce-subtle">💰</div>
-                <h2 className="font-righteous text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#4ECDC4] to-[#45B7D1] bg-clip-text text-transparent">
+                <h2 className="font-righteous text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#4ECDC4] to-[#45B7D1] bg-clip-text text-transparent">
                   입금 정보
                 </h2>
-                <p className="font-outfit text-gray-400">
+                <p className="font-outfit text-gray-400 text-base">
                   아래 계좌로 입금을 완료해주세요
                 </p>
               </div>
