@@ -1,10 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import HomePage from './components/HomePage'
-import JoinPartyForm from './components/JoinPartyForm'
-import AccountInfoPage from './components/AccountInfoPage'
-import SuccessPage from './components/SuccessPage'
-import InterestForm from './components/InterestForm'
-import { UserDataProvider } from './context/UserDataContext'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./components/HomePage";
+import JoinPartyForm from "./components/JoinPartyForm";
+import AccountInfoPage from "./components/AccountInfoPage";
+import SuccessPage from "./components/SuccessPage";
+import InterestForm from "./components/InterestForm";
+import { UserDataProvider } from "./context/UserDataContext";
 
 function App() {
   return (
@@ -25,13 +25,16 @@ function App() {
               <Route path="/account" element={<AccountInfoPage />} />
               <Route path="/success" element={<SuccessPage />} />
               <Route path="/interest" element={<InterestForm />} />
-              <Route path="/interest-success" element={<SuccessPage isInterest />} />
+              <Route
+                path="/interest-success"
+                element={<SuccessPage isInterest />}
+              />
             </Routes>
           </div>
         </div>
       </UserDataProvider>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
